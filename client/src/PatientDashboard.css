@@ -1,0 +1,515 @@
+.dashboard-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  font-family: Arial, sans-serif;
+}
+
+/* Header */
+.dashboard-header {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid #e0e0e0;
+  background-color: white;
+}
+
+.logo {
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.nav-tabs {
+  flex-grow: 1;
+  padding-left: 32px;
+}
+
+.nav-tabs button {
+  background: none;
+  border: none;
+  padding: 8px 16px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  background-color: #e0e0e0;
+  border-radius: 50%;
+  margin-left: 8px;
+}
+
+.logout-btn {
+  margin-left: 10px;
+  padding: 5px 10px;
+  background-color: #f0f0f0;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* Dashboard Content */
+.dashboard-content {
+  display: flex;
+  flex-grow: 1;
+}
+
+/* Sidebar */
+.dashboard-sidebar {
+  width: 160px;
+  border-right: 1px solid #e0e0e0;
+  background-color: #f9f9f9;
+}
+
+.sidebar-item {
+  padding: 16px;
+  cursor: pointer;
+}
+
+.sidebar-item.active {
+  background-color: #f0f0f0;
+  font-weight: bold;
+}
+
+/* Main Panel */
+.dashboard-main {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.main-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid #e0e0e0;
+  background-color: white;
+}
+
+.tab-button {
+  background: none;
+  border: none;
+  padding: 8px 0;
+  font-size: 16px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.tab-button.active {
+  color: #0066cc;
+  border-bottom: 2px solid #0066cc;
+}
+
+.calendar-controls {
+  display: flex;
+  align-items: center;
+}
+
+.nav-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0 8px;
+  font-size: 16px;
+}
+
+.month-name,
+.date-range {
+  margin: 0 8px;
+  font-weight: 500;
+}
+
+.history-button {
+  background-color: #f5f5f5;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  padding: 8px 16px;
+  margin-left: 16px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+/* Calendar View */
+.calendar-view {
+  padding: 20px;
+  background-color: #ffffff;
+  flex-grow: 1;
+}
+
+.month-navigation {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.month-navigation button {
+  padding: 8px 16px;
+  background-color: #f0f0f0;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.month-navigation button:hover {
+  background-color: #e0e0e0;
+}
+
+.month-navigation h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.calendar-header {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  font-weight: 600;
+  text-align: center;
+  background-color: #f5f5f5;
+  border-radius: 4px 4px 0 0;
+}
+
+.calendar-cell {
+  padding: 10px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.calendar-day.empty {
+  background-color: #f0f0f0;
+  pointer-events: none;
+}
+
+.calendar-grid {
+  display: grid !important;
+  grid-template-columns: repeat(7, 1fr) !important;
+  grid-auto-rows: minmax(80px, auto) !important;
+  border: 1px solid #e0e0e0 !important;
+  border-top: none !important;
+  background-color: white !important;
+}
+
+.calendar-day {
+  min-height: 80px;
+  border-right: 1px solid #e0e0e0;
+  border-bottom: 1px solid #e0e0e0;
+  padding: 8px;
+  cursor: pointer;
+  position: relative;
+  transition: background-color 0.2s;
+}
+
+.calendar-day:hover:not(.empty) {
+  background-color: #f5f5f5;
+}
+
+.calendar-day.empty {
+  background-color: #f9f9f9;
+  cursor: default;
+}
+
+.calendar-day.has-appointment {
+  background-color: #e6f7ff;
+}
+
+.day-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.day-number {
+  font-weight: 500;
+  font-size: 16px;
+  margin-bottom: 4px;
+}
+
+.day-date {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.appointment-indicator {
+  margin-top: auto;
+}
+
+.appointment-count {
+  color: #0066cc;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+/* History View */
+.history-view {
+  padding: 16px;
+  flex-grow: 1;
+  background-color: white;
+}
+
+.history-grid {
+  border-top: 1px solid #e0e0e0;
+  border-left: 1px solid #e0e0e0;
+}
+
+.history-header {
+  display: grid;
+  grid-template-columns: 100px repeat(6, 1fr);
+  font-weight: 500;
+  background-color: #f5f5f5;
+}
+
+.time-column,
+.day-column {
+  padding: 8px;
+  border-right: 1px solid #e0e0e0;
+  border-bottom: 1px solid #e0e0e0;
+  text-align: center;
+}
+
+.time-row {
+  display: grid;
+  grid-template-columns: 100px repeat(6, 1fr);
+}
+
+.time-slot {
+  padding: 8px;
+  border-right: 1px solid #e0e0e0;
+  border-bottom: 1px solid #e0e0e0;
+  text-align: center;
+  background-color: #f9f9f9;
+}
+
+.appointment-slot {
+  padding: 8px;
+  border-right: 1px solid #e0e0e0;
+  border-bottom: 1px solid #e0e0e0;
+  min-height: 40px;
+}
+
+.appointment-card {
+  background-color: #e6f7ff;
+  padding: 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  border-left: 3px solid #0066cc;
+}
+
+.dentist-name {
+  font-weight: 500;
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: #fff;
+  padding: 24px;
+  border-radius: 8px;
+  width: 384px;
+  position: relative;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.close-button {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.modal-title {
+  font-size: 18px;
+  margin-bottom: 16px;
+  font-weight: 500;
+}
+
+.date-selector {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  background-color: #f5f5f5;
+  padding: 8px;
+  border-radius: 4px;
+}
+
+.selected-date {
+  flex-grow: 1;
+  text-align: center;
+  font-weight: 500;
+}
+
+.appointment-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-select {
+  margin-bottom: 12px;
+  padding: 10px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.time-slot-label {
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.time-slot-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.time-slot-button {
+  padding: 10px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  background-color: #fff;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.time-slot-button.selected {
+  background-color: #e6f7ff;
+  border-color: #0066cc;
+  color: #0066cc;
+}
+
+.cost-display {
+  margin-bottom: 16px;
+  padding: 12px;
+  background-color: #f9f9f9;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.cost-amount {
+  font-weight: 500;
+  font-size: 16px;
+}
+
+.cost-note {
+  font-size: 12px;
+  color: #666;
+  font-weight: normal;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+}
+
+.cancel-button {
+  padding: 10px 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  background-color: #fff;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.payment-button {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 4px;
+  background-color: #0066cc;
+  color: white;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.payment-button:hover {
+  background-color: #0055b3;
+}
+
+/* Base appointment card styles */
+.appointment-card {
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  border-left: 4px solid #007bff; /* Blue border for default/pending */
+}
+
+/* Green styling for completed appointments */
+.appointment-card.completed {
+  border-left: 4px solid #28a745; /* Green border for completed */
+}
+
+/* Status text styling */
+.status-completed {
+  color: #28a745;
+  font-weight: bold;
+}
+
+.status-pending {
+  color: #007bff;
+  font-weight: bold;
+}
+
+/* The rest of your appointment list styles */
+.appointments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.appointment-date {
+  font-weight: bold;
+  color: #333;
+  width: 150px;
+}
+
+.appointment-time {
+  color: #555;
+  width: 80px;
+}
+
+.appointment-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dentist-name, .service-name {
+  color: #555;
+}
+
+.payment-status, .appointment-status {
+  font-size: 0.9em;
+}
