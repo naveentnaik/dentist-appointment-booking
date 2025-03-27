@@ -18,7 +18,7 @@ const ServiceSchema = new mongoose.Schema({
 const DentistSchema = new mongoose.Schema({
     userId:{type:mongoose.Schema.Types.ObjectId,ref:'User', required: true, unique: true  },
     mobileNo: { type: String, required: true },
-    gender: { type: String, enum: ['Male', 'Female', 'Other'], required: true },
+    gender: { type: String, enum: ['male', 'female', 'Other'], required: true },
     hourlyRate: Number
 });
 

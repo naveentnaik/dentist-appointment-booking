@@ -15,16 +15,33 @@ const router = express.Router();
 
 JWT_SECRET = process.env.JWT_SECRET;
 
-// User Registration (Customer Only)
-router.post("/register", async (req, res) => {
-  const { name, email, password, role = "customer" } = req.body;
+router.post('/signup', async (req, res) => {
   try {
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const user = new User({ name, email, password: hashedPassword, role });
-    await user.save();
-    res.status(201).json({ message: "User registered successfully" });
+    const { fullName, email, username, password } = req.body;
+    
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: 'User is already registered' });
+    }
+
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+    // Create new user with role 'customer'
+    const newUser = new User({
+      name: fullName,
+      email,
+      username,
+      password: hashedPassword,
+      role: 'customer'
+    });
+
+    await newUser.save();
+    res.status(201).json({ message: 'User registered successfully!' });
+
   } catch (error) {
-    res.status(500).json({ error: "Error registering user", error });
+    console.error('Signup error:', error);
+    res.status(500).json({ message: 'Server error. Please try again.' });
   }
 });
 
@@ -51,21 +68,104 @@ router.post("/login", async (req, res) => {
 // Create a new booking (Customer)
 router.post("/book", async (req, res) => {
   const { customerId, serviceId, dentistId, bookingDate, timeSlot } = req.body;
+
   try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const selectedDate = new Date(bookingDate);
+    selectedDate.setHours(0, 0, 0, 0);
+
+    // Check if the selected date is a past date
+    if (selectedDate < today) {
+      return res.status(400).json({ error: "You cannot choose past dates." });
+    }
+
+    // Check if the selected date is a weekday (Monday - Friday)
+    const day = selectedDate.getDay();
+    if (day === 0 || day === 6) {
+      return res.status(400).json({ error: "Appointments are only available Monday to Friday." });
+    }
+
+    // Parse the time slot
+    const [startTime] = timeSlot.split(" - ");
+    const [startHours, startMinutes] = startTime.split(/[: ]/);
+    const isPM = startTime.includes("PM");
+
+    // Convert to 24-hour format
+    let convertedStartHours = parseInt(startHours);
+    if (isPM && convertedStartHours !== 12) {
+      convertedStartHours += 12;
+    } else if (!isPM && convertedStartHours === 12) {
+      convertedStartHours = 0;
+    }
+
+    // Create a date object with the selected time
+    const selectedDateTime = new Date(bookingDate);
+    selectedDateTime.setHours(convertedStartHours, parseInt(startMinutes), 0, 0);
+
+    // Check if the selected time is within business hours (8:30 AM - 5:30 PM)
+    const businessStartTime = new Date(bookingDate);
+    businessStartTime.setHours(8, 30, 0, 0);
+
+    const businessEndTime = new Date(bookingDate);
+    businessEndTime.setHours(17, 30, 0, 0);
+
+    if (selectedDateTime < businessStartTime || selectedDateTime >= businessEndTime) {
+      return res.status(400).json({ error: "Booking is only available between 8:30 AM and 5:30 PM." });
+    }
+
+    // Check if the customer already booked this time slot on the same date
+    const existingCustomerBooking = await Booking.findOne({
+      customer: customerId,
+      bookingDate,
+      timeSlot
+    });
+
+    if (existingCustomerBooking) {
+      return res.status(400).json({ error: "You have already booked this time slot." });
+    }
+
+    // Check if the dentist is already booked for this time slot
+    const existingDentistBooking = await Booking.findOne({
+      dentist: dentistId,
+      bookingDate,
+      timeSlot
+    });
+
+    if (existingDentistBooking) {
+      return res.status(400).json({ error: "This dentist is already booked for this time slot." });
+    }
+
+    // Check if the dentist has already been booked twice on the same day
+    const dentistDailyBookings = await Booking.countDocuments({
+      dentist: dentistId,
+      bookingDate
+    });
+
+    if (dentistDailyBookings >= 2) {
+      return res.status(400).json({ error: "This dentist is fully booked for today." });
+    }
+
+    // Create and save the booking
     const booking = new Booking({
       customer: customerId,
       service: serviceId,
       dentist: dentistId,
-      timeSlot: timeSlot,
-      bookingDate: bookingDate,
+      timeSlot,
+      bookingDate,
       paymentStatus: "completed",
     });
+
     await booking.save();
     res.status(201).json({ message: "Booking created, pending payment" });
+
   } catch (error) {
+    console.error("Error creating booking:", error);
     res.status(500).json({ error: "Error creating booking" });
   }
 });
+
 
 // Mark booking as completed (Dentist)
 router.put("/booking/:id/complete", async (req, res) => {
@@ -249,30 +349,27 @@ router.get("/get-bookings-patient/:id", authenticateUser, async (req, res) => {
   }
 });
 
+
 router.post("/add-dentist", authenticateUser, async (req, res) => {
   try {
     const { name, email, password, mobileNo, gender, hourlyRate } = req.body;
 
-    const existingUser = await User.findOne({ email });
+    console.log("Received dentist data:", req.body);
 
+    const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({ message: "Dentist already exist" });
+      return res.status(400).json({ message: "Dentist already exists" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-
-    const newUser = new User({
-      name,
-      email,
-      password: hashedPassword,
-      role: "dentist",
-    });
+    const newUser = new User({ name, email, password: hashedPassword, role: "dentist" });
 
     const savedUser = await newUser.save();
+    console.log("User saved successfully:", savedUser);
+
     if (!savedUser || !savedUser._id) {
       return res.status(500).json({ message: "Failed to create user" });
     }
-    
 
     const newDentist = new Dentist({
       userId: savedUser._id,
@@ -280,15 +377,14 @@ router.post("/add-dentist", authenticateUser, async (req, res) => {
       gender,
       hourlyRate,
     });
-    await newDentist.save();
 
-    return res.status(201).json({ message: "Dentist added successfully", user: savedUser });
+    const savedDentist = await newDentist.save();
+    console.log("Dentist saved successfully:", savedDentist);
 
-
+    return res.status(201).json({ message: "Dentist added successfully", user: savedUser, dentist: savedDentist });
   } catch (error) {
-
-    res.status(500).json({message:"Server error while adding Dentist",error})
-
+    console.error("Error adding dentist:", error);
+    res.status(500).json({ message: "Server error while adding Dentist", error: error.message });
   }
 });
 

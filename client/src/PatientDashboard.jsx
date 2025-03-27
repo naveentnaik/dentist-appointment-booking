@@ -19,6 +19,13 @@ const PatientDashboard = () => {
 
   const [dentistList, setDentistsList] = useState([]);
   const [serviceList, setServiceList] = useState([]);
+  const [availableTimeSlots, setAvailableTimeSlots] = useState([
+    "08:30 AM - 10:30 AM",
+    "10:30 AM - 12:30 PM",
+    "12:30 PM - 02:30 PM",
+    "02:30 PM - 04:30 PM",
+    "04:30 PM - 05:30 PM",
+  ]);
 
   const getData = async () => {
     const {
@@ -100,9 +107,13 @@ const PatientDashboard = () => {
     return days;
   };
 
-  // Handle date selection
   const handleDateClick = (date) => {
-    if (!date) return;
+    const day = date.getDay();
+    if (day === 0 || day === 6) {
+      alert("Appointments are only available Monday to Friday.");
+      return;
+    }
+
     setSelectedDate(date);
     setFormData({ ...formData, date: date });
     setShowModal(true);
@@ -228,7 +239,7 @@ const PatientDashboard = () => {
           <button onClick={() => setView("calendar")}>Dashboard</button>
         </div>
         <div className="user-info">
-          <span>Patient</span>
+          <span>{localStorage.getItem("userEmail")}</span>
           <div className="avatar"></div>
           <button
             className="logout-btn"
@@ -468,38 +479,17 @@ const PatientDashboard = () => {
 
               <div className="time-slot-label">Select Time Slot</div>
               <div className="time-slot-grid">
-                <button
-                  className={`time-slot-button ${
-                    formData.timeSlot === "11:00 AM" ? "selected" : ""
-                  }`}
-                  onClick={() => handleInputChange("timeSlot", "11:00 AM")}
-                >
-                  11:00 AM
-                </button>
-                <button
-                  className={`time-slot-button ${
-                    formData.timeSlot === "12:00 PM" ? "selected" : ""
-                  }`}
-                  onClick={() => handleInputChange("timeSlot", "12:00 PM")}
-                >
-                  12:00 PM
-                </button>
-                <button
-                  className={`time-slot-button ${
-                    formData.timeSlot === "1:00 PM" ? "selected" : ""
-                  }`}
-                  onClick={() => handleInputChange("timeSlot", "1:00 PM")}
-                >
-                  1:00 PM
-                </button>
-                <button
-                  className={`time-slot-button ${
-                    formData.timeSlot === "2:00 PM" ? "selected" : ""
-                  }`}
-                  onClick={() => handleInputChange("timeSlot", "2:00 PM")}
-                >
-                  2:00 PM
-                </button>
+                {availableTimeSlots.map((slot) => (
+                  <button
+                    key={slot}
+                    className={`time-slot-button ${
+                      formData.timeSlot === slot ? "selected" : ""
+                    }`}
+                    onClick={() => handleInputChange("timeSlot", slot)}
+                  >
+                    {slot}
+                  </button>
+                ))}
               </div>
 
               <div className="cost-display">
