@@ -391,21 +391,33 @@ router.post("/add-dentist", authenticateUser, async (req, res) => {
 // Fetch weekly/monthly reports (Admin)
 router.get("/report/:period", async (req, res) => {
   try {
-    // Calculate Date Range
     const today = new Date();
     let startDate, endDate;
 
     if (req.params.period === "weekly") {
-      startDate = new Date(today.setDate(today.getDate() - 7));
+      // Get start of the week (Sunday)
+      startDate = new Date(today);
+      startDate.setDate(today.getDate() - today.getDay());
+      startDate.setUTCHours(0, 0, 0, 0);
+
+      // Get end of the week (Saturday)
+      endDate = new Date(startDate);
+      endDate.setDate(startDate.getDate() + 6);
+      endDate.setUTCHours(23, 59, 59, 999);
     } else if (req.params.period === "monthly") {
-      startDate = new Date(today.setMonth(today.getMonth() - 1));
+      // Get first day of the month
+      startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+      startDate.setUTCHours(0, 0, 0, 0);
+
+      // Get last day of the month
+      endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+      endDate.setUTCHours(23, 59, 59, 999);
     } else {
       return res.status(400).json({ error: "Invalid period. Use 'weekly' or 'monthly'." });
     }
 
-    endDate = new Date(); // Today's date
+    console.log("Start Date:", startDate, "End Date:", endDate);
 
-    // Fetch bookings within the date range
     const bookings = await Booking.aggregate([
       {
         $match: {
@@ -430,32 +442,15 @@ router.get("/report/:period", async (req, res) => {
       },
       {
         $lookup: {
-          from: "dentists",
+          from: "users",
           localField: "dentist",
-          foreignField: "userId",
+          foreignField: "_id",
           as: "dentist"
         }
       },
-      {
-        $unwind: { path: "$customer", preserveNullAndEmptyArrays: true }
-      },
-      {
-        $unwind: { path: "$service", preserveNullAndEmptyArrays: true }
-      },
-      {
-        $unwind: { path: "$dentist", preserveNullAndEmptyArrays: true }
-      },
-      {
-        $lookup: {
-          from: "users",
-          localField: "dentist.userId",
-          foreignField: "_id",
-          as: "dentistUser"
-        }
-      },
-      {
-        $unwind: { path: "$dentistUser", preserveNullAndEmptyArrays: true }
-      },
+      { $unwind: { path: "$customer", preserveNullAndEmptyArrays: true } },
+      { $unwind: { path: "$service", preserveNullAndEmptyArrays: true } },
+      { $unwind: { path: "$dentist", preserveNullAndEmptyArrays: true } },
       {
         $project: {
           _id: 1,
@@ -463,52 +458,53 @@ router.get("/report/:period", async (req, res) => {
           timeSlot: 1,
           paymentStatus: 1,
           status: 1,
-          "customerName": "$customer.name",
-          "serviceName": "$service.name",
-          "dentistName": "$dentistUser.name"
+          customerName: { $ifNull: ["$customer.name", "Unknown"] },
+          serviceName: { $ifNull: ["$service.name", "Unknown Service"] },
+          dentistName: { $ifNull: ["$dentist.name", "Unknown"] }
         }
       }
     ]);
 
+    console.log("Fetched Bookings:", bookings);
 
     if (!bookings.length) {
       return res.status(404).json({ message: "No bookings found for the selected period." });
     }
 
-    // Group data by Dentist
+    // **Fix: Group by Dentist Name and Count Patients Properly**
     const report = {};
+
     bookings.forEach((booking) => {
-      const dentistId = booking.dentistName || "Unknown";
       const dentistName = booking.dentistName || "Unknown";
 
-      if (!report[dentistId]) {
-        report[dentistId] = {
+      if (!report[dentistName]) {
+        report[dentistName] = {
           dentistName,
           noOfBookings: 0,
-          patientList: [],
+          patientList: []
         };
       }
 
-      report[dentistId].noOfBookings++;
-      report[dentistId].patientList.push({
-        patientName: booking.customerName || "Unknown",
-        serviceRequested: booking.serviceName || "Unknown Service",
-        bookingDate: booking.bookingDate, // Format YYYY-MM-DD
+      report[dentistName].noOfBookings += 1; // Count every booking
+      report[dentistName].patientList.push({
+        patientName: booking.customerName,
+        serviceRequested: booking.serviceName,
+        bookingDate: new Date(booking.bookingDate).toLocaleDateString(),
       });
     });
 
-    // Convert report object to array
-    const finalReport = Object.values(report);
+    console.log("Final Report:", report);
 
     return res.status(200).json({
       period: req.params.period,
-      report: finalReport,
+      report: Object.values(report),
     });
   } catch (error) {
     console.error("Error generating report:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
+
 
 
 

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./AdminDashboard.css";
 import axios from "axios";
 import api from "./api/api";
@@ -46,7 +47,7 @@ const AdminDashboard = () => {
         patientList: dentistReport.patientList.map((patient) => ({
           name: patient.patientName,
           service: patient.serviceRequested,
-          date: new Date(patient.bookingDate).toLocaleDateString(),
+          date: patient.bookingDate, // Formatted in API
         })),
       }));
 
@@ -55,6 +56,8 @@ const AdminDashboard = () => {
       console.error("Error fetching reports:", error);
     }
   };
+
+  const navigate = useNavigate();
 
   const handleViewPatients = (patientList) => {
     setSelectedPatientList(patientList);
@@ -78,7 +81,6 @@ const AdminDashboard = () => {
     gender: "",
     hourlyRate: "",
   });
-  
 
   const handleServiceFormChange = (e) => {
     setServiceForm({ ...serviceForm, [e.target.name]: e.target.value });
@@ -87,7 +89,7 @@ const AdminDashboard = () => {
   const handleDentistFormChange = (e) => {
     const value = e.target.type === "radio" ? e.target.id : e.target.value;
     setDentistForm({ ...dentistForm, [e.target.name]: value });
-  };  
+  };
 
   const handleSubmitService = async (e) => {
     e.preventDefault();
@@ -128,10 +130,10 @@ const AdminDashboard = () => {
 
   const handleSubmitDentist = async (e) => {
     e.preventDefault();
-  
+
     try {
       const token = localStorage.getItem("token");
-  
+
       // This must exactly match the destructuring in your API endpoint
       const dentistData = {
         name: dentistForm.name,
@@ -141,9 +143,9 @@ const AdminDashboard = () => {
         gender: dentistForm.gender,
         hourlyRate: parseFloat(dentistForm.hourlyRate), // Convert to number if needed
       };
-  
+
       console.log("Sending dentist data:", dentistData);
-  
+
       const response = await axios.post(
         "http://localhost:5000/api/add-dentist",
         dentistData,
@@ -154,9 +156,9 @@ const AdminDashboard = () => {
           },
         }
       );
-  
+
       console.log("Dentist added:", response.data);
-  
+
       // Reset form with the correct field names
       setDentistForm({
         name: "",
@@ -166,12 +168,18 @@ const AdminDashboard = () => {
         gender: "",
         hourlyRate: "",
       });
-  
+
       alert("Dentist added successfully");
       setActiveView("dashboard");
     } catch (error) {
-      console.error("Error adding dentist:", error.response?.data || error.message);
-      alert("Error adding dentist: " + (error.response?.data?.message || error.message));
+      console.error(
+        "Error adding dentist:",
+        error.response?.data || error.message
+      );
+      alert(
+        "Error adding dentist: " +
+          (error.response?.data?.message || error.message)
+      );
     }
   };
 
@@ -224,7 +232,7 @@ const AdminDashboard = () => {
               className="logout-btn"
               onClick={() => {
                 localStorage.clear();
-                window.location.href = "/login";
+                navigate("/login");
               }}
             >
               Logout
