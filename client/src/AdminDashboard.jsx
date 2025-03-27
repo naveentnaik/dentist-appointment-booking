@@ -37,19 +37,19 @@ const AdminDashboard = () => {
     try {
       const { data } = await api.get(`/report/${reportType}`);
       console.log(data);
-      
+
       // Format the report data for the table
-      const formattedReportData = data.report.map(dentistReport => ({
+      const formattedReportData = data.report.map((dentistReport) => ({
         dentistName: dentistReport.dentistName,
         bookings: dentistReport.noOfBookings,
         date: reportType === "monthly" ? "Current Month" : "Current Week",
-        patientList: dentistReport.patientList.map(patient => ({
+        patientList: dentistReport.patientList.map((patient) => ({
           name: patient.patientName,
           service: patient.serviceRequested,
-          date: new Date(patient.bookingDate).toLocaleDateString()
-        }))
+          date: new Date(patient.bookingDate).toLocaleDateString(),
+        })),
       }));
-      
+
       setReportData(formattedReportData);
     } catch (error) {
       console.error("Error fetching reports:", error);
@@ -71,14 +71,14 @@ const AdminDashboard = () => {
   // Form states
   const [serviceForm, setServiceForm] = useState({ name: "", price: "" });
   const [dentistForm, setDentistForm] = useState({
-    fullName: "",
+    name: "",
     email: "",
-    mobile: "",
+    password: "",
+    mobileNo: "",
     gender: "",
     hourlyRate: "",
-    username: "",
-    password: "",
   });
+  
 
   const handleServiceFormChange = (e) => {
     setServiceForm({ ...serviceForm, [e.target.name]: e.target.value });
@@ -87,7 +87,7 @@ const AdminDashboard = () => {
   const handleDentistFormChange = (e) => {
     const value = e.target.type === "radio" ? e.target.id : e.target.value;
     setDentistForm({ ...dentistForm, [e.target.name]: value });
-  };
+  };  
 
   const handleSubmitService = async (e) => {
     e.preventDefault();
@@ -128,19 +128,22 @@ const AdminDashboard = () => {
 
   const handleSubmitDentist = async (e) => {
     e.preventDefault();
-
+  
     try {
       const token = localStorage.getItem("token");
-
+  
+      // This must exactly match the destructuring in your API endpoint
       const dentistData = {
         name: dentistForm.name,
         email: dentistForm.email,
-        mobileNo: dentistForm.mobile,
-        gender: dentistForm.gender,
-        hourlyRate: dentistForm.hourlyRate,
         password: dentistForm.password,
+        mobileNo: dentistForm.mobileNo,
+        gender: dentistForm.gender,
+        hourlyRate: parseFloat(dentistForm.hourlyRate), // Convert to number if needed
       };
-
+  
+      console.log("Sending dentist data:", dentistData);
+  
       const response = await axios.post(
         "http://localhost:5000/api/add-dentist",
         dentistData,
@@ -151,30 +154,24 @@ const AdminDashboard = () => {
           },
         }
       );
-
+  
       console.log("Dentist added:", response.data);
-
-      // Reset form state
+  
+      // Reset form with the correct field names
       setDentistForm({
         name: "",
         email: "",
+        password: "",
         mobileNo: "",
         gender: "",
         hourlyRate: "",
-        password: "",
       });
-
+  
       alert("Dentist added successfully");
       setActiveView("dashboard");
     } catch (error) {
-      console.error(
-        "Error adding dentist:",
-        error.response?.data || error.message
-      );
-      alert(
-        "Error adding dentist: " +
-          (error.response?.data?.message || error.message)
-      );
+      console.error("Error adding dentist:", error.response?.data || error.message);
+      alert("Error adding dentist: " + (error.response?.data?.message || error.message));
     }
   };
 
