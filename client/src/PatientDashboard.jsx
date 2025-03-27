@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import "./PatientDashboard.css";
 import api from "./api/api";
 import axios from "axios";
@@ -26,6 +27,8 @@ const PatientDashboard = () => {
     "02:30 PM - 04:30 PM",
     "04:30 PM - 05:30 PM",
   ]);
+
+  const navigate = useNavigate();
 
   const getData = async () => {
     const {
@@ -245,7 +248,7 @@ const PatientDashboard = () => {
             className="logout-btn"
             onClick={() => {
               localStorage.clear();
-              window.location.href = "/login";
+              navigate("/login");
             }}
           >
             Logout

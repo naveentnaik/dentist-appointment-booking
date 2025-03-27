@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./Dentist.css";
 import api from "./api/api";
 
@@ -38,6 +39,8 @@ const Dentist = ({ userType }) => {
   useEffect(() => {
     getAppointments();
   }, []);
+
+  const navigate = useNavigate();
 
   const handleDateClick = (date) => {
     setSelectedDate(date);
@@ -180,7 +183,7 @@ const Dentist = ({ userType }) => {
               className="logout-btn"
               onClick={() => {
                 localStorage.clear();
-                window.location.href = "/login";
+                navigate("/login");
               }}
             >
               Logout

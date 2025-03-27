@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./AdminDashboard.css";
 import axios from "axios";
 import api from "./api/api";
@@ -55,6 +56,8 @@ const AdminDashboard = () => {
       console.error("Error fetching reports:", error);
     }
   };
+
+  const navigate = useNavigate();
 
   const handleViewPatients = (patientList) => {
     setSelectedPatientList(patientList);
@@ -224,7 +227,7 @@ const AdminDashboard = () => {
               className="logout-btn"
               onClick={() => {
                 localStorage.clear();
-                window.location.href = "/login";
+                navigate("/login");
               }}
             >
               Logout
