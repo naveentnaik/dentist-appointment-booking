@@ -13,11 +13,7 @@ const PORT = process.env.PORT;
 
 
 // Middleware
-app.use(cors({
-    origin: "*", 
-    methods: "GET,HEAD,PUT,PATCH,POST,DELETE", 
-    allowedHeaders: "Content-Type,Authorization" 
-}));
+app.use(cors());
 
 app.use(bodyParser.json());
 app.use('/api', router);
