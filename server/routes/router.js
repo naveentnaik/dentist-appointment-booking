@@ -15,6 +15,10 @@ const router = express.Router();
 
 JWT_SECRET = process.env.JWT_SECRET;
 
+router.get("/", (req, res) => {
+    res.json({ message: "API is working!" });
+});
+
 router.post('/signup', async (req, res) => {
   try {
     const { fullName, email, username, password } = req.body;
