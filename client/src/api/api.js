@@ -3,7 +3,7 @@ import {jwtDecode} from "jwt-decode";
 
 
 const api=axios.create({
-    baseURL:"http://localhost:5000/api/",
+    baseURL:"https://dentist-appointment-booking-msij.onrender.com/api/",
     headers:{
         "Content-Type":"application/json"
     }
